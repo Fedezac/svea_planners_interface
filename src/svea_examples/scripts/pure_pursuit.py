@@ -20,6 +20,7 @@ from svea.simulators.viz_utils import (
 )
 from geometry_msgs.msg import PoseArray, PointStamped
 from sensor_msgs.msg import LaserScan
+from svea_planners.planner_interface import PlannerInterface 
 
 
 def load_param(name, value=None):
@@ -66,6 +67,7 @@ class pure_pursuit:
     OBS_THRESH = 0.2
     TARGET_VELOCITY = 0.35
     RATE = 1e9
+    POINTS = [] 
 
     def __init__(self):
 
@@ -74,26 +76,20 @@ class pure_pursuit:
         rospy.init_node('pure_pursuit')
 
         ## Parameters
-
-        self.POINTS = load_param('~points')
         self.OBSTACLES = load_param('~obstacles_points')
         self.IS_SIM = load_param('~is_sim', False)
         self.USE_RVIZ = load_param('~use_rviz', False)
         # Get remote rviz parameter
         self.REMOTE_RVIZ = load_param('~remote_rviz', False)
         self.STATE = load_param('~state', [0, 0, 0, 0])
-
-        assert_points(self.POINTS)
+        print(self.STATE)
 
         ## Set initial values for node
 
         # initial state
         self.state = VehicleState(*self.STATE)
         publish_initialpose(self.state)
-
-        # create goal state
-        self.curr = 0
-        self.goal = self.POINTS[self.curr]
+        self.goal = [self.state.x, self.state.y]
         xs, ys = self.compute_traj()
 
         ## Create simulators, models, managers, etc.
@@ -108,7 +104,7 @@ class pure_pursuit:
                                      dt=self.DELTA_TIME,
                                      run_lidar=True,
                                      start_paused=True).start()
-
+        
         # start the SVEA manager
         self.svea = SVEAPurePursuit(LocalizationInterface,
                                     PurePursuitController,
@@ -132,7 +128,39 @@ class pure_pursuit:
         obs = [msg.point.x, msg.point.y, 0]
         self.OBSTACLES.append(obs)
 
+    def plan(self):
+        start_x = 7.6
+        start_y = 3.7
+        goal_x = 3.8
+        goal_y = 6.7 
+        GRANULARITY = 4
+        debug = False
+        
+        pi = PlannerInterface()
+        pi.set_start([start_x, start_y])
+        pi.set_goal([goal_x, goal_y])
+        pi.initialize_planner_world()
+        pi.compute_path()
+        pi.initialize_path_interface()
+        self.POINTS = pi.get_points_path(GRANULARITY)
+        self.POINTS = self.POINTS.tolist()
+        assert_points(self.POINTS)
+        print(self.POINTS)
+
+        if debug:
+            pi.publish_internal_representation()
+
+        pi.publish_rviz_path()
+        # create goal state
+        self.curr = 0
+        self.goal = self.POINTS[self.curr]
+        print("goal = {}".format(self.goal))
+        
+
     def run(self):
+        self.plan()
+        xs, ys = self.compute_traj()
+        self.svea.update_traj(xs, ys)
         while self.keep_alive():
             self.spin()
 
@@ -169,6 +197,7 @@ class pure_pursuit:
             self.svea.send_control(steering, velocity)
 
         if np.hypot(self.state.x - self.goal[0], self.state.y - self.goal[1]) < self.GOAL_THRESH:
+            print("goal thresh")
             self.update_goal()
             xs, ys = self.compute_traj()
             self.svea.update_traj(xs, ys)
@@ -176,9 +205,12 @@ class pure_pursuit:
         self.svea.visualize_data()
 
     def update_goal(self):
+        print("new_goal = {}, curr = {}".format(self.goal, self.curr))
         self.curr += 1
-        self.curr %= len(self.POINTS)
-        self.goal = self.POINTS[self.curr]
+        if self.curr == len(self.POINTS):
+            self.svea.send_control(0, 0)
+        else:
+            self.goal = self.POINTS[self.curr]
 
     def compute_traj(self):
         xs = np.linspace(self.state.x, self.goal[0], self.TRAJ_LEN)

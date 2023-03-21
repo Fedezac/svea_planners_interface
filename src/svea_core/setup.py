@@ -11,7 +11,7 @@ setup_args = generate_distutils_setup(
         'svea.models',
         'svea.simulators',
         'svea.svea_managers',
-        'svea.tests',
+        'svea.tests'
     ],
     package_dir={'': 'src'},
 )

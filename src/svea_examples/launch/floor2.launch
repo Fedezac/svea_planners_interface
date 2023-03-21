@@ -2,7 +2,7 @@
 <launch>
 
     <!-- Launch file arguments -->
-    <arg name="map" default="sml"/>
+    <arg name="map" default="sml_planner"/>
     <arg name="is_sim" default="true"/>
     <arg name="use_rviz" default="true"/>
     <arg name="remote_rviz" default="false"/>
@@ -41,11 +41,8 @@
         <param name="is_sim" value="$(arg is_sim)"/>
         <!-- Waypoints for floo2 map -->
         <rosparam>
-            state: [-2.65488696, -1.64422277, 1.57] # initial state (x, y, yaw)
-            points:
-            - [-2.65488696, 1]
-            - [0.0, -1.64422277]
-            - [0.8, 1.0]
+            state: [8.5, 1.7, 1.57, 0] # initial state (x, y, yaw)
+
             obstacles_points:
             - [0.8, 1]
         </rosparam>

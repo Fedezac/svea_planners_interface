@@ -58,9 +58,10 @@ def main():
     planner = AStarPlanner(world, [start_x, start_y], [goal_x, goal_y])
     path = np.asarray(planner.create_path())
 
-    path_interface = PathInterface(limits, delta)
-    path_interface.create_ros_path(path)
-    path_interface.publish_path()
+    path_interface = PathInterface(limits, delta, path)
+    path_interface.create_pose_path()
+    path_interface.publish_rviz_path()
+    print(path_interface.get_points_path_reduced())
     rospy.spin()
     
     
