@@ -25,6 +25,11 @@ class PlannerInterface(object):
         rospy.loginfo("Planning interface correctly initialized")
         
     def initialize_planner_world(self):
+        """
+        Function that defines the planner object and the planner world 
+        (which includes a grid representing the environment with its obstacles).
+        It defines the planner only in case start and goal position are given.
+        """
         delta, limits, obstacles = self._gridmap_interface.get_planner_world()
         self._world = AStarWorld(delta=delta, limit=limits, obstacles=np.multiply([delta[0], delta[1], 1], np.array(obstacles)).tolist(), obs_margin=0.05)
         if self._start and self._goal:
@@ -55,22 +60,34 @@ class PlannerInterface(object):
         self._gridmap_interface.publish_map_internal_representation()
 
     def set_start(self, p):
+        """
+        Setter method for start position
+        """
         assert_points(p)
         self._start = p
 
     def set_goal(self, p):
+        """
+        Setter method for goal position
+        """
         assert_points(p)
         self._goal = p
 
     def get_start(self):
+        """
+        Getter method for start position
+        """
         return self._start
     
     def get_goal(self):
+        """
+        Getter method for goal position
+        """
         return self._goal
 
 
 """
-From now on, main for debugging
+==== From now on, main for debugging ====
 """
 def load_param(name, value=None):
     if value is None:

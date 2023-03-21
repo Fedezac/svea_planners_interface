@@ -1,5 +1,5 @@
 <launch>
-    <arg name="map" default="sml"/>
+    <arg name="map" default="sml_planner"/>
     <arg name="x" default="0.06"/>
     <arg name="y" default="-0.06"/>
     <arg name="z" default="0.0"/>

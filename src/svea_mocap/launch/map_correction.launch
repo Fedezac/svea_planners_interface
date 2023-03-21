@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="map" default="sml"/>
+    <arg name="map" default="sml_planner"/>
     <arg name="x" default="0.06"/>
     <arg name="y" default="-0.06"/>
     <arg name="z" default="0.0"/>
@@ -18,7 +18,7 @@
         Read more about static_transform_publisher:
             http://wiki.ros.org/tf#static_transform_publisher
     -->
-    <node if="$(eval map == 'sml')" name="tf_mocap_to_map" pkg="svea_mocap" type="tf_mocap_to_map.py" output="screen">
+    <node if="$(eval map == 'sml_planner')" name="tf_mocap_to_map" pkg="svea_mocap" type="tf_mocap_to_map.py" output="screen">
         <param name="x" value="$(arg x)"/>
         <param name="y" value="$(arg y)"/>
         <param name="z" value="$(arg z)"/>
