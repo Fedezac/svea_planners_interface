@@ -10,7 +10,7 @@ import rospy
 from geometry_msgs.msg import TwistStamped
 from nav_msgs.msg import Odometry
 from svea.states import VehicleState
-from tf.transformations import quaternion_matrix, euler_from_matrix, euler_matrix
+from tf.transformations import quaternion_matrix, euler_from_matrix, euler_matrix, quaternion_from_euler
 import numpy as np
 import math
 
@@ -145,7 +145,7 @@ class MotionCaptureInterface(object):
         :rtype: float
         """
         # Get svea's rotation matrix from pose quaternion
-        svea_T_mocap = quaternion_matrix(msg.pose.pose.orientation)
+        svea_T_mocap = quaternion_matrix([msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w])
         # Add translational part to transofmration matrix
         svea_T_mocap[0:3,3] = np.transpose(np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, 0]))
 
@@ -153,15 +153,48 @@ class MotionCaptureInterface(object):
         svea_T_map = np.matmul(self.T_MATRIX_4, svea_T_mocap)
 
         # Get correct yaw (from manipulated rotation matrix)
-        (_, _, mocap_yaw) = euler_from_matrix(svea_T_map)
-        return svea_T_map[0,3], svea_T_map[1,3], mocap_yaw
+        (mocap_roll, mocap_pitch, mocap_yaw) = euler_from_matrix(svea_T_map)
+        
+        msg.pose.pose.position.x = svea_T_map[0, 3]
+        msg.pose.pose.position.y = svea_T_map[1, 3]
+        quat = quaternion_from_euler(mocap_roll, mocap_pitch, mocap_yaw)
+        msg.pose.pose.orientation.x = quat[0]
+        msg.pose.pose.orientation.y = quat[1]
+        msg.pose.pose.orientation.z = quat[2]
+        msg.pose.pose.orientation.w = quat[3]
+        return msg
     
+    def _compute_vehicle_velocity(self, msg):
+        """
+        Method used to compute the vehicle's velocity given the mocap's twist
+        
+        :param quaternion: quaternion used to extract and correct velocity
+        :type quaternion: Quaternion
+
+        :return: v[0] vehicle velocity
+        :rtype: float
+        """
+
+        # Apply 4 dimension square rotation matrix (rotate svea's yaw)
+        corr_linear_twist = np.matmul(self.T_MATRIX_4[0:3,0:3], np.array([msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.linear.z]).T)
+        corr_angular_twist = np.matmul(self.T_MATRIX_4[0:3,0:3], np.array([msg.twist.twist.angular.x, msg.twist.twist.angular.y, msg.twist.twist.angular.z]).T)
+        
+        msg.twist.twist.linear.x = corr_linear_twist[0]
+        msg.twist.twist.linear.y = corr_linear_twist[1]
+        msg.twist.twist.linear.z = corr_linear_twist[2]
+
+        msg.twist.twist.angular.x = corr_angular_twist[0]
+        msg.twist.twist.angular.y = corr_angular_twist[1]
+        msg.twist.twist.angular.z = corr_angular_twist[2]
+        
+        return msg
 
     def _read_odom_msg(self, msg):
         if not self._curr_vel_twist is None:
             msg = self.fix_twist(msg)
-            corrected_msg = self._correct_mocap_coordinates(msg)
-            self.state.odometry_msg = corrected_msg
+            msg = self._correct_mocap_coordinates(msg)
+            msg = self._compute_vehicle_velocity(msg)
+            self.state.odometry_msg = msg
             # apply model offsets (if any)
             self.state.x += self._x_offset
             self.state.y += self._y_offset

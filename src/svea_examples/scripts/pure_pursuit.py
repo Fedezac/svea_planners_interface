@@ -111,7 +111,9 @@ class pure_pursuit:
                                     PurePursuitController,
                                     xs, ys,
                                     data_handler=RVIZPathHandler if self.USE_RVIZ or self.REMOTE_RVIZ else TrajDataHandler)
-
+        
+        #TODO: parameterize mocap_name
+        self.svea.localizer.update_name('svea7')
         self.svea.controller.target_velocity = self.TARGET_VELOCITY
         # Create publisher in order to publish obstacle points onto RVIz
         self.init_pts_publisher = rospy.Publisher("/obstacles_points",
@@ -143,7 +145,7 @@ class pure_pursuit:
         pi.initialize_planner_world()
         pi.compute_path()
         pi.initialize_path_interface()
-        #[[7.700000114738941, 4.500000067055225], [7.700000114738941, 4.700000070035458], [7.650000113993883, 4.90000007301569], [7.500000111758709, 5.15000007674098], [7.400000110268593, 5.350000079721212], [7.350000109523535, 5.550000082701445], [7.200000107288361, 5.800000086426735], [7.1500001065433025, 6.000000089406967], [7.050000105053186, 6.200000092387199], [6.900000102818012, 6.45000009611249]]
+        #self.POINTS = [[7.700000114738941, 4.500000067055225], [7.700000114738941, 4.700000070035458], [7.650000113993883, 4.90000007301569], [7.500000111758709, 5.15000007674098], [7.400000110268593, 5.350000079721212], [7.350000109523535, 5.550000082701445], [7.200000107288361, 5.800000086426735], [7.1500001065433025, 6.000000089406967], [7.050000105053186, 6.200000092387199], [6.900000102818012, 6.45000009611249]]
         self.POINTS = pi.get_points_path(GRANULARITY)
         self.POINTS = self.POINTS.tolist()
         assert_points(self.POINTS)
@@ -177,6 +179,7 @@ class pure_pursuit:
         #!! always start fro (0,0) and not the new position)
         # limit the rate of main loop by waiting for state
         self.state = self.svea.wait_for_state()
+        print("state: {},{}".format(self.state.x, self.state.y))
 
         # Obstacle Management
         x = []

@@ -31,7 +31,7 @@ class PlannerInterface(object):
         It defines the planner only in case start and goal position are given.
         """
         delta, limits, obstacles = self._gridmap_interface.get_planner_world()
-        self._world = AStarWorld(delta=delta, limit=limits, obstacles=np.multiply([delta[0], delta[1], 1], np.array(obstacles)).tolist(), obs_margin=0.1)
+        self._world = AStarWorld(delta=delta, limit=limits, obstacles=np.multiply([delta[0], delta[1], 1], np.array(obstacles)).tolist(), obs_margin=0.05)
         if self._start and self._goal:
             self._planner = AStarPlanner(self._world, self._start, self._goal)
         else:

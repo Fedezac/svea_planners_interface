@@ -1,7 +1,7 @@
 <launch>
     <arg name="map" default="sml_planner"/>
-    <arg name="x" default="0.06"/>
-    <arg name="y" default="-0.06"/>
+    <arg name="x" default="5.619764999999999"/> <!-- x offset: Mocap in the middle of the map -->
+    <arg name="y" default="-5.870124000000001"/> <!-- y offset: Mocap in the middle of the map -->
     <arg name="z" default="0.0"/>
     <arg name="roll" default="0.0"/>
     <arg name="pitch" default="0.0"/>
