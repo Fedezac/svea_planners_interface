@@ -10,6 +10,9 @@ import rospy
 from geometry_msgs.msg import TwistStamped
 from nav_msgs.msg import Odometry
 from svea.states import VehicleState
+from tf.transformations import quaternion_matrix, euler_from_matrix, euler_matrix
+import numpy as np
+import math
 
 __license__ = "MIT"
 __maintainer__ = "Frank Jiang"
@@ -47,6 +50,12 @@ class MotionCaptureInterface(object):
         self.is_ready = False
         self._ready_event = Event()
         rospy.on_shutdown(self._shutdown_callback)
+
+        # Offset angle between the mocap frame (of the real world) and the map frame
+        self.OFFSET_ANGLE = -math.pi/2
+        self.T_MATRIX_4 = euler_matrix(0, 0, self.OFFSET_ANGLE)
+        # Create rotation matrix given the offset angle and linear misalignment between mocap and map frames
+        self.T_MATRIX_4[0:3,3] = np.transpose(np.array([5.619764999999999, 5.870124000000001, 0]))
 
         # list of functions to call whenever a new state comes in
         self.callbacks = []
@@ -116,11 +125,43 @@ class MotionCaptureInterface(object):
     def fix_twist(self, odom_msg):
         odom_msg.twist.twist = self._curr_vel_twist
         return odom_msg
+    
+    def _correct_mocap_coordinates(self, msg):
+        """
+        Method used to correct the mocap pose (if some misalignment between its frame and the map frame is present)
+        
+        :param x: x coordinate to be corrected 
+        :type x: float
+        :param y: y coordinate to be corrected 
+        :type y: float
+        :param quaternion: quaternion used to extract and correct yaw angle 
+        :type quaternion: Quaternion
+
+        :return: rotate_point[0] corrected x coordinate
+        :rtype: float
+        :return: rotate_point[1] corrected y coordinate
+        :rtype: float
+        :return: mocap_yaw corrected yaw angle
+        :rtype: float
+        """
+        # Get svea's rotation matrix from pose quaternion
+        svea_T_mocap = quaternion_matrix(msg.pose.pose.orientation)
+        # Add translational part to transofmration matrix
+        svea_T_mocap[0:3,3] = np.transpose(np.array([msg.pose.pose.position.x, msg.pose.pose.position.y, 0]))
+
+        # Apply 4 dimension square rotation matrix (rotate svea's yaw)
+        svea_T_map = np.matmul(self.T_MATRIX_4, svea_T_mocap)
+
+        # Get correct yaw (from manipulated rotation matrix)
+        (_, _, mocap_yaw) = euler_from_matrix(svea_T_map)
+        return svea_T_map[0,3], svea_T_map[1,3], mocap_yaw
+    
 
     def _read_odom_msg(self, msg):
         if not self._curr_vel_twist is None:
             msg = self.fix_twist(msg)
-            self.state.odometry_msg = msg
+            corrected_msg = self._correct_mocap_coordinates(msg)
+            self.state.odometry_msg = corrected_msg
             # apply model offsets (if any)
             self.state.x += self._x_offset
             self.state.y += self._y_offset

@@ -11,6 +11,7 @@ from svea.models.bicycle import SimpleBicycleModel
 from svea.states import VehicleState
 from svea.simulators.sim_SVEA import SimSVEA
 from svea.interfaces import LocalizationInterface
+from svea_mocap.mocap import MotionCaptureInterface
 from svea.controllers.pure_pursuit import PurePursuitController
 from svea.svea_managers.path_following_sveas import SVEAPurePursuit
 from svea.data import TrajDataHandler, RVIZPathHandler
@@ -106,7 +107,7 @@ class pure_pursuit:
                                      start_paused=True).start()
         
         # start the SVEA manager
-        self.svea = SVEAPurePursuit(LocalizationInterface,
+        self.svea = SVEAPurePursuit(MotionCaptureInterface,
                                     PurePursuitController,
                                     xs, ys,
                                     data_handler=RVIZPathHandler if self.USE_RVIZ or self.REMOTE_RVIZ else TrajDataHandler)
