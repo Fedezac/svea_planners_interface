@@ -7,8 +7,8 @@
     <arg name="use_rviz" default="true"/>
     <arg name="remote_rviz" default="false"/>
     <arg name="obstacle_map" default="sml_obstacles"/>
-    <arg name="initial_pose_x" default="8.5"/>
-    <arg name="initial_pose_y" default="1.7"/>
+    <arg name="initial_pose_x" default="7.8"/>
+    <arg name="initial_pose_y" default="3.5"/>
     <arg name="initial_pose_a" default="1.57" /> <!-- wrt to map-->
 
     <!-- Start map server -->
@@ -25,12 +25,14 @@
             <param name="baud" value="250000"/>
         </node>
 
-        <!-- Start localization
-        <include file="$(find svea_sensors)/launch/localize.launch">
-            <arg name="initial_pose_x" value="$(arg initial_pose_x)" />
-            <arg name="initial_pose_y" value="$(arg initial_pose_y)" />
-            <arg name="initial_pose_a" value="$(arg initial_pose_a)" />
-        </include>-->
+    <!-- Start localization -->
+<!--
+    <include file="$(find svea_sensors)/launch/localize.launch">
+        <arg name="initial_pose_x" value="$(arg initial_pose_x)" />
+        <arg name="initial_pose_y" value="$(arg initial_pose_y)" />
+        <arg name="initial_pose_a" value="$(arg initial_pose_a)" />
+    </include>
+-->
     </group>
 
     <!-- Start RViz -->
@@ -39,9 +41,9 @@
     <node name="pure_pursuit" pkg="svea_examples" type="pure_pursuit.py" output="screen">
         <param name="use_rviz" value="$(arg use_rviz)"/>
         <param name="is_sim" value="$(arg is_sim)"/>
-        <!-- Waypoints for floor2 map -->
+        <!-- Waypoints for floo2 map -->
         <rosparam>
-            state: [8.5, 1.7, 1.57, 0] # initial state (x, y, yaw)
+            state: [7.8, 3.5, 1.57, 0] # initial state (x, y, yaw)
 
             obstacles_points:
             - [0.8, 1]

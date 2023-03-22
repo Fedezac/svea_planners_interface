@@ -2,8 +2,8 @@
 <launch>
 
     <arg name="map" default="sml_planner"/>
-    <arg name="x" default="0.06"/>
-    <arg name="y" default="-0.06"/>
+    <arg name="x" default="0.06"/> <!-- x offset: Mocap in the middle of the map -->
+    <arg name="y" default="-0.06"/> <!-- y offset: Mocap in the middle of the map -->
     <arg name="z" default="0.0"/>
     <arg name="roll" default="0.0"/>
     <arg name="pitch" default="0.0"/>
@@ -15,18 +15,10 @@
         This transform was measured for the `svea_core/maps/sml` map in March 2023.
         If you use any other map (or SLAM'd a new map for SML) then you cannot use
         this correction.
+
         Read more about static_transform_publisher:
             http://wiki.ros.org/tf#static_transform_publisher
     -->
-    <node if="$(eval map == 'sml_planner')" name="tf_mocap_to_map" pkg="svea_mocap" type="tf_mocap_to_map.py" output="screen">
-        <param name="x" value="$(arg x)"/>
-        <param name="y" value="$(arg y)"/>
-        <param name="z" value="$(arg z)"/>
-        <param name="yaw" value="$(arg yaw)"/>
-        <param name="roll" value="$(arg roll)"/>
-        <param name="pitch" value="$(arg pitch)"/>
-        <param name="frame_id" value="$(arg frame_id)"/>
-        <param name="child_frame" value="$(arg child_frame)"/>
-    </node>
+    <node if="$(eval map == 'sml_planner')" pkg="tf" type="static_transform_publisher" name="tf_mocap_to_map" args="$(arg x) $(arg y) $(arg z) $(arg yaw) $(arg pitch) $(arg roll) $(arg frame_id) $(arg child_frame) 100" />
 
 </launch>

@@ -221,12 +221,12 @@ class AStarWorld(object):
         """
         # Set occupancy grid to 0 (everything free)
         occ_grid = np.zeros(self._res)
+        # Get grid of discrete points of the map (x coordinate of each point will be in xx and y coordinate of each
+        # point will be in yy)
+        xx, yy = np.meshgrid(np.linspace(self.LIMIT[0,0], self.LIMIT[0,1], self._res[0]),
+                                np.linspace(self.LIMIT[1,0], self.LIMIT[1,1], self._res[1]))
         # For every obstacle (get its coordinates)
         for xc, yc, r in obs:
-            # Get grid of discrete points of the map (x coordinate of each point will be in xx and y coordinate of each
-            # point will be in yy)
-            xx, yy = np.meshgrid(np.linspace(self.LIMIT[0,0], self.LIMIT[0,1], self._res[0]),
-                                 np.linspace(self.LIMIT[1,0], self.LIMIT[1,1], self._res[1]))
             # Compute distance from the obstacle center to closest discrete world point
             dist = np.hypot(xx-xc, yy-yc)
             # Get coordinates which are inside the circle

@@ -129,10 +129,10 @@ class pure_pursuit:
         self.OBSTACLES.append(obs)
 
     def plan(self):
-        start_x = 7.6
-        start_y = 3.7
-        goal_x = 6.5 #3.8
-        goal_y = 4.5#6.7 
+        start_x = 7.7
+        start_y = 4.5
+        goal_x = 6.9 
+        goal_y = 6.5
         GRANULARITY = 4
         debug = False
         
@@ -142,6 +142,7 @@ class pure_pursuit:
         pi.initialize_planner_world()
         pi.compute_path()
         pi.initialize_path_interface()
+        #[[7.700000114738941, 4.500000067055225], [7.700000114738941, 4.700000070035458], [7.650000113993883, 4.90000007301569], [7.500000111758709, 5.15000007674098], [7.400000110268593, 5.350000079721212], [7.350000109523535, 5.550000082701445], [7.200000107288361, 5.800000086426735], [7.1500001065433025, 6.000000089406967], [7.050000105053186, 6.200000092387199], [6.900000102818012, 6.45000009611249]]
         self.POINTS = pi.get_points_path(GRANULARITY)
         self.POINTS = self.POINTS.tolist()
         assert_points(self.POINTS)
@@ -166,7 +167,7 @@ class pure_pursuit:
 
     def keep_alive(self):
         #!! self.svea.is_finished becomes true if in pure_pursuit controller, function _calc_target_index,
-        return not (rospy.is_shutdown())
+        return not (self.svea.is_finished or rospy.is_shutdown())
 
     def spin(self):
         #!! Safe to send controls is localization node is up and running
@@ -197,7 +198,6 @@ class pure_pursuit:
             self.svea.send_control(steering, velocity)
 
         if np.hypot(self.state.x - self.goal[0], self.state.y - self.goal[1]) < self.GOAL_THRESH:
-            print("goal thresh")
             self.update_goal()
             xs, ys = self.compute_traj()
             self.svea.update_traj(xs, ys)
@@ -208,11 +208,12 @@ class pure_pursuit:
         self.curr += 1
         if self.curr == len(self.POINTS):
             self.svea.send_control(0, 0)
-            self.curr = self.curr - 1
+            self.svea.controller.is_finished = True
             print("Goal reached!")
         else:
-            print("new_goal = {}, curr = {}, len={}".format(self.goal, self.curr, len(self.POINTS)))
-            self.goal = self.POINTS[self.curr]
+            if self.curr < len(self.POINTS):
+                print("new_goal = {}, curr = {}, len={}".format(self.goal, self.curr, len(self.POINTS)))
+                self.goal = self.POINTS[self.curr]
 
     def compute_traj(self):
         xs = np.linspace(self.state.x, self.goal[0], self.TRAJ_LEN)
