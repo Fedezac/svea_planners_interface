@@ -80,7 +80,7 @@ class pure_pursuit:
         self.IS_SIM = load_param('~is_sim', False)
         self.USE_RVIZ = load_param('~use_rviz', False)
         # Get remote rviz parameter
-        self.REMOTE_RVIZ = load_param('~remote_rviz', False)
+        self.REMOTE_RVIZ = load_param('~remote_rviz', True)
         self.STATE = load_param('~state', [0, 0, 0, 0])
         print(self.STATE)
 
@@ -131,8 +131,8 @@ class pure_pursuit:
     def plan(self):
         start_x = 7.6
         start_y = 3.7
-        goal_x = 3.8
-        goal_y = 6.7 
+        goal_x = 6.5 #3.8
+        goal_y = 4.5#6.7 
         GRANULARITY = 4
         debug = False
         
@@ -205,11 +205,13 @@ class pure_pursuit:
         self.svea.visualize_data()
 
     def update_goal(self):
-        print("new_goal = {}, curr = {}".format(self.goal, self.curr))
         self.curr += 1
         if self.curr == len(self.POINTS):
             self.svea.send_control(0, 0)
+            self.curr = self.curr - 1
+            print("Goal reached!")
         else:
+            print("new_goal = {}, curr = {}, len={}".format(self.goal, self.curr, len(self.POINTS)))
             self.goal = self.POINTS[self.curr]
 
     def compute_traj(self):

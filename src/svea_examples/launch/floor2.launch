@@ -39,7 +39,7 @@
     <node name="pure_pursuit" pkg="svea_examples" type="pure_pursuit.py" output="screen">
         <param name="use_rviz" value="$(arg use_rviz)"/>
         <param name="is_sim" value="$(arg is_sim)"/>
-        <!-- Waypoints for floo2 map -->
+        <!-- Waypoints for floor2 map -->
         <rosparam>
             state: [8.5, 1.7, 1.57, 0] # initial state (x, y, yaw)
 
