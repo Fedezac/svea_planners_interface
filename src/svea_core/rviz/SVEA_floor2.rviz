@@ -5,10 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Raw LiDAR1
-        - /TF1
-        - /TF1/Status1
         - /TF1/Frames1
-        - /MocapPose1
         - /Path1
       Splitter Ratio: 0.5329341292381287
     Tree Height: 1762
@@ -29,7 +26,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: Lidar Point Cloud
+    SyncSource: Raw LiDAR
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -255,13 +252,33 @@ Visualization Manager:
         All Enabled: true
         base_link:
           Value: true
+        imu:
+          Value: true
+        laser:
+          Value: true
         map:
           Value: true
         mocap:
           Value: true
         odom:
           Value: true
+        rosie0:
+          Value: true
         svea7:
+          Value: true
+        t265_camera_accel_frame:
+          Value: true
+        t265_camera_accel_optical_frame:
+          Value: true
+        t265_camera_gyro_frame:
+          Value: true
+        t265_camera_gyro_optical_frame:
+          Value: true
+        t265_camera_link:
+          Value: true
+        t265_camera_odom_frame:
+          Value: true
+        t265_camera_pose_frame:
           Value: true
       Marker Alpha: 1
       Marker Scale: 1
@@ -272,6 +289,23 @@ Visualization Manager:
       Tree:
         mocap:
           map:
+            odom:
+              base_link:
+                imu:
+                  {}
+                laser:
+                  {}
+                t265_camera_pose_frame:
+                  t265_camera_link:
+                    t265_camera_accel_frame:
+                      t265_camera_accel_optical_frame:
+                        {}
+                    t265_camera_gyro_frame:
+                      t265_camera_gyro_optical_frame:
+                        {}
+              t265_camera_odom_frame:
+                {}
+          rosie0:
             {}
           svea7:
             {}
@@ -345,7 +379,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 22.52711296081543
+      Distance: 35.26856994628906
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -353,17 +387,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 5.254712104797363
-        Y: 5.422597408294678
-        Z: -0.38177815079689026
+        X: 6.650528907775879
+        Y: 7.549346446990967
+        Z: -4.632314205169678
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6000009775161743
+      Pitch: 0.6547980308532715
       Target Frame: base_link
-      Yaw: 3.7550010681152344
+      Yaw: 4.1399946212768555
     Saved: ~
 Window Geometry:
   Displays:
@@ -382,4 +416,4 @@ Window Geometry:
     collapsed: false
   Width: 2400
   X: 0
-  Y: 0
+  Y: 54
